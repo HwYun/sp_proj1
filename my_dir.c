@@ -15,12 +15,12 @@ int instruction_dir(){
 		lstat(entry->d_name, &buf);
 
 		if (S_ISDIR(buf.st_mode))
-			printf("%s/\t", entry->d_name);
+			printf("\t%s/", entry->d_name);
 		else if ( S_ISREG(buf.st_mode)){
 			if((S_IEXEC & buf.st_mode) != 0)
-				printf("%s*\t",entry->d_name);
+				printf("\t%s*",entry->d_name);
 			else
-				printf("%s\t", entry->d_name);
+				printf("\t%s", entry->d_name);
 		}
 
 		if(print_line++ >= 3){
@@ -28,6 +28,7 @@ int instruction_dir(){
 			print_line = 0;
 		}
 	}
+	printf("\n");
 	closedir(dp);
 
 	return 0;
