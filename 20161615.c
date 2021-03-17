@@ -44,6 +44,9 @@ int main(){
 			printf("\nh[elp]\nd[ir]\nq[uit]\nhi[story]\ndu[mp] [start, end]\n");
 			printf("e[dit] address, value\nf[ill] start, end, value\nreset\nopcode mnemonic\nopcodelist\n\n");
 		}
+		else if(strcmp(instruction, "dir") == 0 || strcmp(instruction, "d") == 0){ // dir
+			instruction_dir();
+		}
 		else{
 			printf("Please Input Correct Instruction!\n");
 		}

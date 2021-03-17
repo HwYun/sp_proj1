@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-g -Wall
-OBJS=20161615.o
+OBJS=20161615.o my_dir.o
 TARGET=20161615.out
 
 all: $(TARGET)
@@ -14,5 +14,5 @@ $(TARGET): $(OBJS)
 	$(CC) -o $@ $(OBJS)
 
 20161615.o: 20161615.h 20161615.c
-
+my_dir.o: 20161615.h my_dir.c
 
