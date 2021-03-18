@@ -20,12 +20,12 @@ hisptr front = NULL;
 hisptr rear = NULL;
 
 int main(){ 
-	char instruction[INSTRUCTION_LEN] = {0, };
-	char tokenize[INSTRUCTION_LEN] = {0, };
 
 	int dump_address = 0;
 	while(1){
 		printf("sicsim> ");
+		char instruction[INSTRUCTION_LEN] = {0, };
+		char tokenize[INSTRUCTION_LEN] = {0, };
 		fgets(instruction, INSTRUCTION_LEN, stdin);
 		instruction[strlen(instruction)-1]='\0';
 		strcpy(tokenize, instruction);
@@ -33,7 +33,10 @@ int main(){
 		// printf("%d\n", (int)strlen(instruction));
 
 		int end_idx = 0;
-		char token[10][INSTRUCTION_LEN] = {0, };
+		char token[10][INSTRUCTION_LEN];
+		for(int i=0 ; i<10; i++)
+			for(int j=0 ; j<INSTRUCTION_LEN;j++)
+				token[i][j] = 0;
 		if(strchr(tokenize, 32)) {
 			char *temp_tok = strtok(tokenize, " ");
 			strcpy(token[0], temp_tok);
@@ -95,10 +98,14 @@ int main(){
 					}
 				}
 				else if(strchr(token[1], ',')){ // AA,BB 형태인 경우
-					char *tmp_ptr = strtok(token[1], ",");
-					address_dec_start = hexadecimal_to_decimal(tmp_ptr);
-					tmp_ptr = strtok(NULL, ",");
-					address_dec_end = hexadecimal_to_decimal(tmp_ptr);
+					char *tmp_ptr[2];
+					tmp_ptr[0] = strtok(token[1], ",");
+					address_dec_start = hexadecimal_to_decimal(tmp_ptr[0]);
+					tmp_ptr[1] = strtok(NULL, ",");
+					address_dec_end = hexadecimal_to_decimal(tmp_ptr[1]);
+					strcpy(token[1], tmp_ptr[0]);
+					strcpy(token[2], ",\0");
+					strcpy(token[3], tmp_ptr[1]);
 
 					if( (address_dec_start >= 0) && (address_dec_end >= 0)){ // 올바른 16진수가 들어온 경우
 						if(address_dec_start <= address_dec_end){
@@ -188,14 +195,22 @@ int main(){
 			int edit_value = -1;
 			if(end_idx == 2){ // address,value 인 형태
 				if(strchr(token[1], ',')){ 
-					char *tmp_ptr = strtok(token[1], ",");
-					edit_address = hexadecimal_to_decimal(tmp_ptr);
-					tmp_ptr = strtok(NULL, ",");
-					edit_value = hexadecimal_to_decimal(tmp_ptr);
+					char *tmp_ptr[2];
+					tmp_ptr[0] = strtok(token[1], ",");
+					edit_address = hexadecimal_to_decimal(tmp_ptr[0]);
+					tmp_ptr[1] = strtok(NULL, ",");
+					edit_value = hexadecimal_to_decimal(tmp_ptr[1]);
+					strcpy(token[1], tmp_ptr[0]);
+					strcpy(token[2], ",\0");
+					strcpy(token[3], tmp_ptr[1]);
 
 					if( (edit_address >= 0) && (edit_value >= 0)){ // 올바른 16진수가 들어온 경우
-						create_history_tok(token);
-						// edit(edit_address, edit_value);
+						if(edit_address < MEMORY_SIZE && edit_value < 16*16){
+							create_history_tok(token);
+							edit(edit_address, edit_value);
+						}
+						else
+							printf("Out of Range!\n");
 					}
 					else
 						printf("This is not hexadecimal.\n");
@@ -220,8 +235,12 @@ int main(){
 					edit_address = hexadecimal_to_decimal(token[1]);
 					edit_value = hexadecimal_to_decimal(token[2]);
 					if( (edit_address >= 0) && (edit_value >= 0)){ // 올바른 16진수가 들어온 경우
-						create_history_tok(token);
-						// edit(edit_address, edit_value);	
+						if(edit_address < MEMORY_SIZE && edit_value < 16*16){
+							create_history_tok(token);
+							edit(edit_address, edit_value);	
+						}
+						else
+							printf("Out of Range!\n");
 					}
 					else
 						printf("This is not hexadecimal.\n");
@@ -231,16 +250,103 @@ int main(){
 
 			}
 			else if(end_idx == 4){
-				if(strcmp(token[2], ",") == 0){ // start와 end 사이에 콤마가 존재할 때
+				if(strcmp(token[2], ",") == 0){ //  address와 value사이에 콤마가 존재할 때
 					edit_address = hexadecimal_to_decimal(token[1]);
 					edit_value = hexadecimal_to_decimal(token[3]);
 					if( (edit_address >= 0) && (edit_value >= 0)){ // 올바른 형태의 16진수
-						create_history_tok(token);
-						// edit(edit_address, edit_value);
+						if(edit_address < MEMORY_SIZE && edit_value < 16*16){
+							create_history_tok(token);
+							edit(edit_address, edit_value);
+						}
+						else
+							printf("Out of Range!\n");
 					}
 					else
 						printf("This is not hexadecimal.\n");
 
+				}
+				else
+					printf("Please Input Correct Instruction.\n");
+
+			}
+		}
+		else if(strcmp(instruction, "reset") == 0){
+			create_history_ins(instruction);
+			reset();
+		}
+		else if(strcmp(token[0], "f") == 0 || strcmp(token[0], "fill") == 0){
+			int address_dec_start = -1;
+			int address_dec_end = -1;
+			int value = -1;
+			if(end_idx == 2){ // address,end,value 의 형태
+				char *tmp_ptr[3] = {NULL, };
+				tmp_ptr[0] = strtok(token[1], ",");
+				address_dec_start = hexadecimal_to_decimal(tmp_ptr[0]);
+				tmp_ptr[1] = strtok(NULL, ",");
+				address_dec_end = hexadecimal_to_decimal(tmp_ptr[1]);
+				tmp_ptr[2] = strtok(NULL, ",");
+				value = hexadecimal_to_decimal(tmp_ptr[2]);
+
+				strcpy(token[1], tmp_ptr[0]);
+				strcpy(token[2], tmp_ptr[1]);
+				strcpy(token[3], tmp_ptr[2]);
+
+				if( (address_dec_start >= 0) && (address_dec_end >= 0)){ // 올바른 16진수가 들어온 경우
+					if(address_dec_start <= address_dec_end){
+						if(fill(address_dec_start, address_dec_end, value) != -1){
+							create_history_tok(token);
+						}
+						else
+							printf("Out of Range!\n");
+					}
+					else
+						printf("Please Input Correct Address!\n");
+
+				}
+				else
+					printf("This is not hexadecimal.\n");
+			}
+			else if(end_idx >= 3){ // address, end,value 또는 address,end, value 등등
+				int comma_flag = 0;
+				char *tmp_ptr=NULL;
+				char long_token[9*INSTRUCTION_LEN] = {0 ,};
+				for(int i=1 ; i<10 ; i++)
+					strcat(long_token, token[i]);
+
+				// printf("long_token: %s\n", long_token); // 잘 붙여졌나 확인
+				tmp_ptr = strtok(long_token, ",");
+				int tok_idx = 1;
+				while(1){
+					if(tmp_ptr==NULL) break;
+					comma_flag = 1;
+					strcpy(token[tok_idx], tmp_ptr);
+					tmp_ptr = strtok(NULL, ",");
+					tok_idx+=2;
+					if(tok_idx == 7) break;
+				}
+				//for(int i=1 ; i<6 ; i+=2)
+				//	printf("%s\n",token[i]);
+
+				strcpy(token[2], ",\0");
+				strcpy(token[4], ",\0");
+
+				if(comma_flag){
+					address_dec_start = hexadecimal_to_decimal(token[1]);
+					address_dec_end = hexadecimal_to_decimal(token[3]);
+					value = hexadecimal_to_decimal(token[5]);
+					if( (address_dec_start >= 0) && (address_dec_end >= 0)){ // 올바른 16진수가 들어온 경우
+						if(address_dec_start <= address_dec_end){
+							if(fill(address_dec_start, address_dec_end, value) != -1){
+								create_history_tok(token);
+							}
+							else
+								printf("Out of Range!\n");
+						}
+						else
+							printf("Please Input Correct Address!\n");
+					}
+					else
+						printf("This is not hexadecimal.\n");
 				}
 				else
 					printf("Please Input Correct Instruction.\n");

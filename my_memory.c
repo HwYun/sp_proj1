@@ -35,17 +35,17 @@ int hexadecimal_to_decimal(char *hexadecimal){ // 16진수 문자열을 10진수
 
 // 10진수를 16진수로 바꾸어 출력해주는 함수 (1byte의 데이터만 가능)
 void print_hex_from_dec(char decimal){
-	char hex[3] = {0, };
-
+	unsigned char hex[3] = {0, };
+	unsigned char dec = (unsigned char)decimal;
 	unsigned int pos = 0;
 	for( pos = 0 ; pos < 2 ; pos++){
-		char mod = decimal % 16;
+		unsigned char mod = dec % 16;
 		if (mod < 10)
 			hex[pos] = '0' + mod;
 		else
 			hex[pos] = 'A' - 10 + mod;
 		
-		decimal /= 16;
+		dec /= 16;
 
 	}
 	for(int i = pos - 1; i >= 0; i--)
@@ -116,8 +116,36 @@ int dump_start_end(int start, int end){ // start에서 end까지 출력.
 }
 
 
-int edit(int address, int value){
+int edit(int address, unsigned char value){
+	memory_space[address/16][address%16] = value;
 	return 0;
 }
 
 
+int fill(int start, int end, unsigned char value){
+	int start_add = start;
+	int end_add = end;
+	if(start_add < 0 || start_add >= MEMORY_SIZE) return -1;
+	if(end_add < 0 || end_add >= MEMORY_SIZE) return -1;
+	if(value < 0 || value >= 16*16) return -1;
+
+	int start_line = start_add / 16;
+	int end_line = end_add / 16;
+	int print_chk = start_line * 16;
+
+	for(int i = start_line ; i <= end_line ; i++){
+		for( int j = 0 ; j < 16 ; j++){
+			if((print_chk >= start_add) && (print_chk <= end_add))
+				memory_space[i][j] = value;
+			print_chk++;
+		}
+	}
+	return 0;
+}
+
+void reset(){
+	for(int i=0; i< 65536 ; i++){
+		for (int j=0 ; j<16 ; j++)
+			memory_space[i][j] = 0;
+	}
+}

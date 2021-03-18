@@ -23,4 +23,8 @@ void print_hex_from_dec(char decimal);
 int dump_start(int start);
 int dump_start_end(int start, int end);
 
-int edit(int address, int value);
+int edit(int address, unsigned char value);
+
+int fill(int start, int end, unsigned char value);
+
+void reset();
