@@ -19,5 +19,8 @@ int instruction_dir();
 int my_pow(int a, int b);
 int hexadecimal_to_decimal(char *hexadecimal);
 void print_hex_from_dec(char decimal);
+
 int dump_start(int start);
 int dump_start_end(int start, int end);
+
+int edit(int address, int value);

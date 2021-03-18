@@ -114,3 +114,10 @@ int dump_start_end(int start, int end){ // start에서 end까지 출력.
 
 	return 0;
 }
+
+
+int edit(int address, int value){
+	return 0;
+}
+
+
