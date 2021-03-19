@@ -8,7 +8,6 @@ typedef struct _history{ // 명령어 History 구조체
 }his;
 
 
-void replace(char *str, char input, char output);
 
 void create_history_ins(char *instruction);
 void create_history_tok(char token[10][INSTRUCTION_LEN]);
@@ -22,6 +21,7 @@ hisptr rear = NULL;
 int main(){ 
 
 	int dump_address = 0;
+	create_opcode_hash();
 	while(1){
 		printf("sicsim> ");
 		char instruction[INSTRUCTION_LEN] = {0, };
@@ -353,18 +353,40 @@ int main(){
 
 			}
 		}
+		else if(strcmp(token[0], "opcode") == 0){
+			// token[1]을 find_hash 함수로 확인
+			// 맞으면 해당하는 opcode hashtable에서 찾아서 출력
+			// 아니면 실행 하지 않음.
+			char opcode = find_hash(token[1]);
+			if(opcode != -1){
+				printf("opcode is ");
+				print_hex_from_dec(opcode);
+				printf("\n");
+				create_history_tok(token);
+			}
+			else printf("Please Input Corrcet Opcode.\n");
+
+		}
+		else if(strcmp(instruction, "opcodelist") == 0){
+			create_history_ins(instruction);
+			print_hashtable(); // Hash Table 출력
+		}
 		else
 			printf("Please Input Correct Instruction.\n");
 	}
 
 	free_history();
+	free_hash();
+
 	return 0;
 }
 
 
 void replace(char *str, char input, char output){
-	for(int i=0;i<sizeof(str); i++){
-		if(str[i] == input) str[i] = output;
+	for(int i=0;i<strlen(str); i++){
+		if(str[i] == input) {
+			str[i] = output;
+		}
 	}
 }
 
