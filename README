@@ -1,1 +1,18 @@
-This is README
+make를 입력하면 compile이 완료되며
+실행파일 20161615.out 이 생성됩니다.
+
+실행 후
+
+h[elp]
+d[ir]
+q[uit]
+hi[story]
+du[mp] [start, end]
+e[dit] address, value
+f[ill] start, end, value
+reset
+opcode mnemonic
+opcodelist
+
+등의 명령어를 사용할 수 있습니다.
+q 또는 quit 입력하면 프로그램이 종료됩니다.
