@@ -27,6 +27,7 @@ int main(){
 		char instruction[INSTRUCTION_LEN] = {0, };
 		char tokenize[INSTRUCTION_LEN] = {0, };
 		fgets(instruction, INSTRUCTION_LEN, stdin);
+		replace(instruction, '\t', ' ');
 		instruction[strlen(instruction)-1]='\0';
 		strcpy(tokenize, instruction);
 		// printf("%s\n",instruction); // Test Input
