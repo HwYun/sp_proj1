@@ -1,6 +1,7 @@
 #include "20161615.h"
 
-int instruction_dir(){
+
+int instruction_dir(){ // 현재 디렉토리의 파일들을 출력한다.
 	DIR* dp = NULL;
 	struct dirent* entry = NULL;
 	struct stat buf;

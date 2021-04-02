@@ -64,7 +64,8 @@ int main(){
 		if (strcmp(instruction, "quit") == 0 || strcmp(instruction, "q") == 0) break; // quit
 		else if (strcmp(instruction, "help") == 0 || strcmp(instruction, "h") == 0){ // help
 			printf("\nh[elp]\nd[ir]\nq[uit]\nhi[story]\ndu[mp] [start, end]\n");
-			printf("e[dit] address, value\nf[ill] start, end, value\nreset\nopcode mnemonic\nopcodelist\n\n");
+			printf("e[dit] address, value\nf[ill] start, end, value\nreset\nopcode mnemonic\nopcodelist\n");
+			printf("assemble filename\ntype filename\nsymbol\n\n");
 			create_history_ins(instruction);
 		}
 		else if(strcmp(instruction, "dir") == 0 || strcmp(instruction, "d") == 0){ // dir
@@ -371,6 +372,15 @@ int main(){
 		else if(strcmp(instruction, "opcodelist") == 0){
 			create_history_ins(instruction);
 			print_hashtable(); // Hash Table 출력
+		}
+		else if(strcmp(token[0], "type") == 0){
+			// type filename
+		}
+		else if(strcmp(token[0], "assemble") == 0){
+			// assemble filename
+		}
+		else if(strcmp(instruction, "symbol") == 0){
+			// symbol
 		}
 		else
 			printf("Please Input Correct Instruction.\n");
