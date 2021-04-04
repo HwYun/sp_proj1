@@ -38,8 +38,11 @@ typedef struct HashNode* hashptr;
 typedef struct HashNode{
 	char mnemonic[10];
 	char opcode;
+	char format[5];
 	hashptr next;
 }HashNode;
+
+HashNode *hash_table[20];
 
 void print_hashtable();
 int hash_key(char *mnemonic);
@@ -53,5 +56,17 @@ void free_hash();
 int type(char *filename);
 
 
+/* assemble.c */
 
+typedef struct _symbol{
+	char symbol[10];
+	int location;
+}Symbol;
 
+Symbol symbol_tab[100];
+Symbol last_symbol_tab[100];
+
+int find_sym(char *label);
+int pass_one(char *filename, int *length);
+void error_handling(int line_num);
+void print_symbol_table();

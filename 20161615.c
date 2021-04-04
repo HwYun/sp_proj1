@@ -22,6 +22,8 @@ int main(){
 
 	int dump_address = 0;
 	create_opcode_hash();
+
+	int asm_length=0;
 	while(1){
 		printf("sicsim> ");
 		char instruction[INSTRUCTION_LEN] = {0, };
@@ -381,10 +383,12 @@ int main(){
 		else if(strcmp(token[0], "assemble") == 0){
 			// assemble filename
 			create_history_tok(token);
+			pass_one(token[1], &asm_length);
 		}
 		else if(strcmp(instruction, "symbol") == 0){
 			// symbol
 			create_history_ins(instruction);
+			print_symbol_table();
 		}
 		else
 			printf("Please Input Correct Instruction.\n");

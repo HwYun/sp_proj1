@@ -38,13 +38,13 @@ void print_hex_from_dec(char decimal){
 	unsigned char hex[3] = {0, };
 	unsigned char dec = (unsigned char)decimal;
 	unsigned int pos = 0;
-	for( pos = 0 ; pos < 2 ; pos++){
+	for( pos = 0 ; pos < 2; pos++){
 		unsigned char mod = dec % 16;
 		if (mod < 10)
 			hex[pos] = '0' + mod;
 		else
 			hex[pos] = 'A' - 10 + mod;
-		
+
 		dec /= 16;
 
 	}

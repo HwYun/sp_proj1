@@ -1,6 +1,5 @@
 #include "20161615.h"
 
-HashNode *hash_table[20];
 
 void print_hashtable(){
 	int head_chk=0;
@@ -37,6 +36,7 @@ void create_opcode_hash(){
 	char *tok_ptr;
 	char code;
 	char mnem[10];
+	char form[5];
 
 	while(1){
 		for(int i=0 ; i<INSTRUCTION_LEN ; i++) op_line[i] = 0;
@@ -51,9 +51,12 @@ void create_opcode_hash(){
 		code = hexadecimal_to_decimal(tok_ptr);
 		tok_ptr = strtok(NULL, " ");
 		strcpy(mnem, tok_ptr);
+		tok_ptr = strtok(NULL, " ");
+		strcpy(form, tok_ptr);
 
 		HashNode* node = (HashNode*)malloc(sizeof(HashNode));
 		strcpy(node->mnemonic, mnem);
+		strcpy(node->format, form);
 		node->opcode = code;
 		node->next = NULL;
 		add_hash(node);
