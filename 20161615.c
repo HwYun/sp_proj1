@@ -375,12 +375,16 @@ int main(){
 		}
 		else if(strcmp(token[0], "type") == 0){
 			// type filename
+			if( type(token[1]) != -1) create_history_tok(token);
+			else printf("There is no file!\n");
 		}
 		else if(strcmp(token[0], "assemble") == 0){
 			// assemble filename
+			create_history_tok(token);
 		}
 		else if(strcmp(instruction, "symbol") == 0){
 			// symbol
+			create_history_ins(instruction);
 		}
 		else
 			printf("Please Input Correct Instruction.\n");

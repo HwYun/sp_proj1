@@ -47,3 +47,11 @@ void create_opcode_hash();
 void add_hash(HashNode* node);
 char find_hash(char *mnemonic);
 void free_hash();
+
+
+/* type.c */
+int type(char *filename);
+
+
+
+
