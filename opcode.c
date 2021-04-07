@@ -87,6 +87,18 @@ char find_hash(char *mnemonic){
 	return -1; // 아무것도 못찾았을 경우
 }
 
+int find_format(char *mnemonic, char *format){
+	int key = hash_key(mnemonic);
+	HashNode* tmp = NULL;
+	for (tmp = hash_table[key] ; tmp != NULL; tmp = tmp->next){
+		if(strcmp(tmp->mnemonic, mnemonic) == 0){
+			strcpy(format, tmp->format);
+			return 1;
+		}
+	}
+	return -1; // 아무것도 못찾았을 경우
+}
+
 void free_hash(){
 	HashNode* del = NULL;
 	for(int i=0 ; i<20 ; i++){

@@ -49,6 +49,7 @@ int hash_key(char *mnemonic);
 void create_opcode_hash();
 void add_hash(HashNode* node);
 char find_hash(char *mnemonic);
+int find_format(char *mnemonic, char *format);
 void free_hash();
 
 
@@ -60,13 +61,27 @@ int type(char *filename);
 
 typedef struct _symbol{
 	char symbol[10];
+	char str_data[10];
+	int num_data;
 	int location;
 }Symbol;
 
 Symbol symbol_tab[100];
 Symbol last_symbol_tab[100];
 
+typedef struct source_statement{
+	int loc;
+	char label[20];
+	char opcode[20];
+	char operand[20];
+	char obj_code[10];
+	char comment[100];
+}SrcState;
+
 int find_sym(char *label);
 int pass_one(char *filename, int *length);
+int pass_two(char *filename, int file_line_len, int length);
+void decimal_to_hexadecimal(int decimal, char *hexadecimal);
+void generate_obj_lst(SrcState stat, char *filename);
 void error_handling(int line_num);
 void print_symbol_table();
