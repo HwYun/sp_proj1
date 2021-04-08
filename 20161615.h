@@ -61,8 +61,6 @@ int type(char *filename);
 
 typedef struct _symbol{
 	char symbol[10];
-	char str_data[10];
-	int num_data;
 	int location;
 }Symbol;
 
@@ -81,7 +79,6 @@ typedef struct source_statement{
 int find_sym(char *label);
 int pass_one(char *filename, int *length);
 int pass_two(char *filename, int file_line_len, int length);
-void decimal_to_hexadecimal(int decimal, char *hexadecimal);
-void generate_obj_lst(SrcState stat, char *filename);
+void generate_obj_lst(SrcState *stat, char *filename, int length);
 void error_handling(int line_num);
 void print_symbol_table();

@@ -382,10 +382,12 @@ int main(){
 		}
 		else if(strcmp(token[0], "assemble") == 0){
 			// assemble filename
-			if (pass_one(token[1], &asm_length) == -1) printf("It is not asm file.\n");
+			int file_len = pass_one(token[1], &asm_length);
+			int chk_flag = 0;
+			if (file_len == -1) printf("It is not asm file.\n");
 			else{
-				// pass_two();
-				create_history_tok(token);
+				chk_flag = pass_two(token[1], file_len, asm_length);
+				if(chk_flag != -1) create_history_tok(token);
 			}
 		}
 		else if(strcmp(instruction, "symbol") == 0){

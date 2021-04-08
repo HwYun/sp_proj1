@@ -7,6 +7,8 @@ all: $(TARGET)
 
 clean:
 	rm -f *.o
+	rm -f *.lst
+	rm -f *.obj
 	rm -f $(TARGET)
 
 
