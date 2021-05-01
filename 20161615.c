@@ -68,6 +68,8 @@ int main(){
 			printf("\nh[elp]\nd[ir]\nq[uit]\nhi[story]\ndu[mp] [start, end]\n");
 			printf("e[dit] address, value\nf[ill] start, end, value\nreset\nopcode mnemonic\nopcodelist\n");
 			printf("assemble filename\ntype filename\nsymbol\n\n");
+			printf("progaddr [address]\nloader [object filename1] [object filename2] [...]\n");
+			printf("bp [address]\nrun\n");
 			create_history_ins(instruction);
 		}
 		else if(strcmp(instruction, "dir") == 0 || strcmp(instruction, "d") == 0){ // dir
