@@ -20,6 +20,8 @@ int instruction_dir();
 
 
 /* my_memory.c */
+unsigned char memory_space[65536][16];
+
 int my_pow(int a, int b);
 int hexadecimal_to_decimal(char *hexadecimal);
 void print_hex_from_dec(char decimal);
@@ -52,10 +54,8 @@ char find_hash(char *mnemonic);
 int find_format(char *mnemonic, char *format);
 void free_hash();
 
-
 /* type.c */
 int type(char *filename);
-
 
 /* assemble.c */
 
@@ -82,3 +82,29 @@ int pass_two(char *filename, int file_line_len, int length);
 void generate_obj_lst(SrcState *stat, char *filename, int length);
 void error_handling(int line_num);
 void print_symbol_table();
+
+/* proj3 */
+int progaddr;
+
+
+/* loader.c */
+typedef struct ExNode* exptr;
+
+typedef struct ExNode{
+	char symbol_name[7];
+	int address;
+	exptr next;
+}ExNode;
+
+typedef struct ExHead{
+	char sec_name[7];
+	int starting_address;
+	int cslth;
+	exptr next;
+}ExHead;
+
+void linking_loader(char token[][INSTRUCTION_LEN], int file_num);
+void l_pass_one(char *filename, ExHead *extab, int file_num, int *csaddr);
+void clear_str(char *str);
+void add_node_extab(ExHead *extab, int ex_hash_key, char *symbol_name, int address);
+void free_extab(ExHead *extab, int file_num);

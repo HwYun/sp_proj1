@@ -67,9 +67,9 @@ int main(){
 		else if (strcmp(instruction, "help") == 0 || strcmp(instruction, "h") == 0){ // help
 			printf("\nh[elp]\nd[ir]\nq[uit]\nhi[story]\ndu[mp] [start, end]\n");
 			printf("e[dit] address, value\nf[ill] start, end, value\nreset\nopcode mnemonic\nopcodelist\n");
-			printf("assemble filename\ntype filename\nsymbol\n\n");
+			printf("assemble filename\ntype filename\nsymbol\n");
 			printf("progaddr [address]\nloader [object filename1] [object filename2] [...]\n");
-			printf("bp [address]\nrun\n");
+			printf("bp [address]\nrun\n\n");
 			create_history_ins(instruction);
 		}
 		else if(strcmp(instruction, "dir") == 0 || strcmp(instruction, "d") == 0){ // dir
@@ -396,6 +396,28 @@ int main(){
 			// symbol
 			create_history_ins(instruction);
 			print_symbol_table();
+		}
+		else if(strcmp(token[0], "progaddr") == 0){ // loader 또는 run 명령어 수행시 시작하는 주소 지정
+			int tmp_address;
+			tmp_address = hexadecimal_to_decimal(token[1]);
+			if(tmp_address < 0)
+				printf("Please Input Correct Hexadecimal.\n");
+			else{
+				progaddr = tmp_address;
+				create_history_tok(token);
+			}
+		}
+		else if(strcmp(token[0], "loader") == 0){
+			int file_num=0;
+			for (int i=1 ; i<10; i++){
+				if(token[i][0]==0){
+					file_num = i-1;
+					break;
+				}
+			}
+			printf("file_num: %d\n", file_num);
+			linking_loader(token, file_num);
+			create_history_tok(token);
 		}
 		else
 			printf("Please Input Correct Instruction.\n");

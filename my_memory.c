@@ -1,6 +1,5 @@
 #include "20161615.h"
 
-unsigned char memory_space[65536][16];
 
 
 int my_pow(int a, int b){
