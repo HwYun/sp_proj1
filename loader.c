@@ -93,10 +93,13 @@ void l_pass_two(char *filename, ExHead *extab, int file_num, int *csaddr){
 	char objcode[100] = {0, };
 	char tmp_str[7] = {0, };
 	char control_sec[7] = {0, };
-	char ref_num[10][7] = {{0, },};
+	int ref_num[10] = {0, };
 	int cur_address = 0;
 	int ex_key = 0;
 	int cslth=0;
+	int cur_mod=-1;
+	int calc_value = 0;
+	int byte_len = 0;
 
 	while(1){
 		clear_str(objcode);
@@ -106,7 +109,7 @@ void l_pass_two(char *filename, ExHead *extab, int file_num, int *csaddr){
 			strncpy(control_sec, objcode + 1, 6);// CSNAME
 			eliminate_space(control_sec);
 			ex_key = ex_hash_key(control_sec, file_num);
-			strcpy(ref_num[1], control_sec);
+			ref_num[1] = extab[ex_key].starting_address;
 
 			strncpy(tmp_str, objcode + 7, 6); // CSADDR
 			*csaddr+=hexadecimal_to_decimal(tmp_str);
@@ -129,14 +132,30 @@ void l_pass_two(char *filename, ExHead *extab, int file_num, int *csaddr){
 				//printf("ref_num: %s ; ", tmp_num);
 				strncpy(tmp_str, objcode + 3 + i*8, 6); // symbol
 				eliminate_space(tmp_str);
+				for(int i=0 ; i<strlen(tmp_str) ; i++){
+					if(tmp_str[i] == '\n'){
+						tmp_str[i] = '\0';
+						break;
+					}
+				}
 				//printf("symbol: %s\n", tmp_str);
-				strcpy(ref_num[tmp_idx], tmp_str);
+				//strcpy(ref_num[tmp_idx], tmp_str);
+				ex_key = ex_hash_key(tmp_str, file_num);
+				for(exptr tmp_ptr = extab[ex_key].next ; tmp_ptr != NULL ; tmp_ptr = tmp_ptr->next){
+					// printf("%s :: %s\n", tmp_ptr->symbol_name, tmp_str);
+					if(strcmp(tmp_ptr->symbol_name, tmp_str) == 0){
+						ref_num[tmp_idx] = tmp_ptr->address;
+					}
+				}
+				// printf("%s / %04X\n", tmp_str, ref_num[tmp_idx]);
 				clear_str(tmp_str);
 			}
 
+			/*
 			for(int i=1 ; i<=tmp_iter+1 ; i++){
 				printf("%02d: %s\n", i, ref_num[i]);
 			}
+			*/
 		}
 		else if(objcode[0] == 'T'){
 			char starting_add[7]={0, };
@@ -144,10 +163,10 @@ void l_pass_two(char *filename, ExHead *extab, int file_num, int *csaddr){
 			int obj_len = 0;
 			strncpy(starting_add, objcode + 1, 6); // address
 			cur_address = hexadecimal_to_decimal(starting_add) + *csaddr;
-			printf("csaddr: %04X // startind_add: %s\n", *csaddr, starting_add);
+			// printf("csaddr: %04X // startind_add: %s\n", *csaddr, starting_add);
 			strncpy(objcode_len, objcode + 7, 2); // objcode len
 			obj_len = hexadecimal_to_decimal(objcode_len);
-			printf("obj_len: %d\n",obj_len);
+			// printf("obj_len: %d\n",obj_len);
 			char *tmp_add=objcode + 9;
 			char tmp_obj[3] = {0, };
 			for(int i=0; i<obj_len*2 ; i+=2){
@@ -159,15 +178,100 @@ void l_pass_two(char *filename, ExHead *extab, int file_num, int *csaddr){
 		}
 		else if(objcode[0] == 'M'){
 			// Modification
+			char mod_address[7] = {0, };
+			char mod_byte[3] = {0, };
+			char mod_sign[2] = {0, };
+			char reference_num[3] = {0, };
+			int ref_idx=0;
+
+			strncpy(mod_address, objcode + 1, 6);
+			strncpy(mod_byte, objcode + 7, 2);
+			strncpy(mod_sign, objcode + 9, 1);
+			strncpy(reference_num, objcode + 10, 2);
+			ref_idx = atoi(reference_num);
+
+			// printf("%s\n%s^%s^%s%02X\n", ref_num[1], mod_address, mod_byte, mod_sign, ref_idx);
+			
+
+			if(cur_mod == hexadecimal_to_decimal(mod_address)){ // 이전 modification에 이어서 계산
+				if(mod_sign[0] == '+') calc_value += ref_num[ref_idx];
+				else if(mod_sign[0] == '-') calc_value -= ref_num[ref_idx];
+			}
+			else if(cur_mod == -1){ // 처음 계산만 한다.
+				calc_value = 0;
+				cur_address = hexadecimal_to_decimal(mod_address) + *csaddr;
+				cur_mod = cur_address - *csaddr;
+				byte_len = hexadecimal_to_decimal(mod_byte) + 1;
+				byte_len /=2;
+
+				for(int i=byte_len-1 ; i>=0; i--){
+					calc_value+=(int)memory_space[cur_address/16][cur_address%16] * my_pow(256,i);
+					cur_address++;
+				}
+				// printf("초기값: %06X\n", calc_value);
+
+				if(calc_value >= my_pow(2, 23)){ // 음수일 때
+					calc_value = twos_complement(calc_value);
+				}
+
+				if(mod_sign[0] == '+') calc_value += ref_num[ref_idx];
+				else if(mod_sign[0] == '-')	calc_value -= ref_num[ref_idx];
+			}
+			else{ // 메모리에 저장하고 현재 modification 계산 실행
+				char mod_value[7];
+
+				sprintf(mod_value, "%06X", calc_value);
+				// printf("value: %s\n",mod_value);
+				cur_address = cur_mod + *csaddr;
+				char tmp_obj[3] = {0, };
+				for(int i=0 ; i<byte_len*2 ; i+=2){
+					strncpy(tmp_obj, mod_value + i, 2);
+					memory_space[cur_address/16][cur_address%16]=(unsigned char)hexadecimal_to_decimal(tmp_obj);
+					cur_address++;
+				}
+
+				cur_address = hexadecimal_to_decimal(mod_address) + *csaddr;
+				cur_mod = cur_address - *csaddr;
+
+				byte_len = hexadecimal_to_decimal(mod_byte) + 1;
+				byte_len /=2;
+
+				calc_value = 0;
+				for(int i=byte_len-1 ; i>=0; i--){
+					calc_value+=(int)memory_space[cur_address/16][cur_address%16] * my_pow(256,i);
+					cur_address++;
+				}
+				// printf("초기값: %06X\n", calc_value);
+				if(calc_value>=my_pow(2,23)){ // 음수일 때.
+					calc_value = twos_complement(calc_value);
+				}
+				if(mod_sign[0] == '+') calc_value += ref_num[ref_idx];
+				else if(mod_sign[0] == '-')	calc_value -= ref_num[ref_idx];
+
+			}
+			//printf("%06X\n", cur_mod);
+
+			
 		}
-		else if(objcode[0] == 'E')
+		else if(objcode[0] == 'E'){
+			if(cur_mod != -1){
+				char mod_value[7] = {0, };
+				sprintf(mod_value, "%06X", calc_value);
+				cur_address = cur_mod + *csaddr;
+				char tmp_obj[3] = {0, };
+				for(int i=0 ; i<byte_len*2 ; i+=2){
+					strncpy(tmp_obj, mod_value + i, 2);
+					memory_space[cur_address/16][cur_address%16]=(unsigned char)hexadecimal_to_decimal(tmp_obj);
+				cur_address++;
+				}
+			}
 			*csaddr += cslth;
+		}
 
 	}
 
 	fclose(fp);
 	
-
 }
 
 int ex_hash_key(char *str, int file_num){
@@ -189,6 +293,12 @@ void eliminate_space(char *str){
 	}
 }
 
+int twos_complement(int value){
+	value = value|0b11111111000000000000000000000000;
+	value = ~value;
+	// printf("t_c: %d\n", value + 1);
+	return (value + 1) * (-1);
+}
 
 void add_node_extab(ExHead *extab, int ex_hash_key, char *symbol_name, int address){
 	ExNode *new_node = (ExNode*)malloc(sizeof(ExNode));

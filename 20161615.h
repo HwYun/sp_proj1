@@ -109,5 +109,6 @@ void l_pass_two(char *filename, ExHead *extab, int file_num, int *csaddr);
 int ex_hash_key(char *str, int file_num);
 void clear_str(char *str);
 void eliminate_space(char *str);
+int twos_complement(int value);
 void add_node_extab(ExHead *extab, int ex_hash_key, char *symbol_name, int address);
 void free_extab(ExHead *extab, int file_num);

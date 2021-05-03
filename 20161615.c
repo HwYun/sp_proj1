@@ -415,7 +415,7 @@ int main(){
 					break;
 				}
 			}
-			printf("file_num: %d\n", file_num);
+			// printf("file_num: %d\n", file_num);
 			linking_loader(token, file_num);
 			create_history_tok(token);
 		}
