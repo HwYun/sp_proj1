@@ -85,7 +85,10 @@ void print_symbol_table();
 
 /* proj3 */
 int progaddr;
+int break_point[100];
+int bp_num;
 
+int A, X, L, B, S, T, F, PC, SW, CC; // Register
 
 /* loader.c */
 typedef struct ExNode* exptr;
@@ -112,3 +115,11 @@ void eliminate_space(char *str);
 int twos_complement(int value);
 void add_node_extab(ExHead *extab, int ex_hash_key, char *symbol_name, int address);
 void free_extab(ExHead *extab, int file_num);
+
+/* run_bp.c */
+void bp(char *breakpooint);
+void bp_clear();
+void print_bp();
+void bp_sort();
+void my_run();
+void execute_opcode(int format, int opcode, int nixbpe, int target_address);

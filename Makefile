@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-g -Wall
-OBJS=20161615.o my_dir.o my_memory.o opcode.o type.o assemble.o loader.o
+OBJS=20161615.o my_dir.o my_memory.o opcode.o type.o assemble.o loader.o run_bp.o
 TARGET=20161615.out
 
 all: $(TARGET)
@@ -22,3 +22,4 @@ opcode.o: 20161615.h opcode.c
 type.o: 20161615.h type.c
 assemble.o: 20161615.h assemble.c
 loader.o: 20161615.h loader.c
+run_bp.o: 20161615.h run_bp.c

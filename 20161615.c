@@ -407,7 +407,7 @@ int main(){
 				create_history_tok(token);
 			}
 		}
-		else if(strcmp(token[0], "loader") == 0){
+		else if(strcmp(token[0], "loader") == 0){ // loader filename...
 			int file_num=0;
 			for (int i=1 ; i<10; i++){
 				if(token[i][0]==0){
@@ -417,6 +417,19 @@ int main(){
 			}
 			// printf("file_num: %d\n", file_num);
 			linking_loader(token, file_num);
+			create_history_tok(token);
+		}
+		else if(strcmp(instruction, "bp") == 0){ // bp 하나만 입력 들어왔을 경우
+			print_bp();
+			create_history_ins(instruction);
+		}
+		else if(strcmp(token[0], "bp") == 0){ // bp와 인자 하나가 더 입력되었을 경우
+			if(strcmp(token[1], "clear") == 0){ // bp clear
+				bp_clear();
+			}
+			else{ // bp [address]
+				bp(token[1]);
+			}
 			create_history_tok(token);
 		}
 		else
