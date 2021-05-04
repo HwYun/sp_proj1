@@ -116,6 +116,7 @@ void my_run(){
 		print_register();
 		printf("\t\tEnd Program\n");
 		is_continue = 0;
+		exeaddr = progaddr;
 	}
 	
 }
