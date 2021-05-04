@@ -13,9 +13,9 @@ void print_hashtable(){
 			}
 			else // 첫 노드가 아니면
 				head_chk = 0;
-			printf("[%s,", tmp->mnemonic);
-			print_hex_from_dec(tmp->opcode);
-			printf("\b]");
+			printf("[%s,%2X]", tmp->mnemonic, tmp->opcode);
+			// print_hex_from_dec(tmp->opcode);
+			// printf("\b]");
 			tmp = tmp->next;
 		}
 		printf("\n");
@@ -34,7 +34,7 @@ void create_opcode_hash(){
 	FILE *fp=fopen("opcode.txt","r");
 	char op_line[INSTRUCTION_LEN];
 	char *tok_ptr;
-	char code;
+	int code;
 	char mnem[10];
 	char form[5];
 
@@ -54,10 +54,13 @@ void create_opcode_hash(){
 		tok_ptr = strtok(NULL, " ");
 		strcpy(form, tok_ptr);
 
+		eliminate_space(form);
+		
 		HashNode* node = (HashNode*)malloc(sizeof(HashNode));
 		strcpy(node->mnemonic, mnem);
 		strcpy(node->format, form);
 		node->opcode = code;
+		// printf("mnemonic: %s // format: %s // opcode: %04X\n", node->mnemonic, node->format, node->opcode); // 잘 작동하나 확인
 		node->next = NULL;
 		add_hash(node);
 	}
@@ -76,7 +79,7 @@ void add_hash(HashNode* node){
 	// printf("%s\n", node->mnemonic);
 }
 
-char find_hash(char *mnemonic){
+int find_hash(char *mnemonic){
 	int key = hash_key(mnemonic);
 	HashNode* tmp = NULL;
 	for (tmp = hash_table[key] ; tmp != NULL; tmp = tmp->next){
@@ -110,3 +113,18 @@ void free_hash(){
 	}
 }
 
+
+int opcode_format(int opcode){
+	// printf("opcode format에서 찾는 중!! %2X\n", opcode);
+	HashNode *tmp = NULL;
+	for(int i=0 ; i<20 ; i++){
+		for(tmp = hash_table[i] ; tmp!=NULL; tmp = tmp->next)
+			if(tmp->opcode == opcode){
+				// printf("%2X // %s\n", opcode, tmp->format);
+				if(strcmp(tmp->format, "3/4\0") == 0) return 3;
+				else if(strcmp(tmp->format, "2\0") == 0) return 2;
+				else return 0;
+			}
+	}
+	return 0;
+}

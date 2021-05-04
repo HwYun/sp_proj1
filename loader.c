@@ -35,6 +35,7 @@ void linking_loader(char token[][INSTRUCTION_LEN], int file_num){
 	}
 	printf("--------------------------------\n");
 	printf("\t  total length  %04X\n", total_length);
+	prog_len = total_length;
 	free_extab(extab, file_num);
 }
 

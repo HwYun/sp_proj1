@@ -1,5 +1,6 @@
 #include "20161615.h"
 
+int is_continue = 0;
 
 void bp(char *breakpoint){
 	// bp [address]
@@ -38,18 +39,91 @@ void bp_sort(){
 
 
 void my_run(){
+	PC = exeaddr;
+	int opcode, format, target_address, nixbpe;
+	int cnt = 0;
+	int max_cnt = prog_len;
+	int start_address = progaddr;
+	int end_address;
+	unsigned char ni;
+	end_address = progaddr + max_cnt;
+	// printf("%06X // %06X\n", start_address, end_address);
+	int is_end = 1;
+	int break_flag=0;
 
+
+	if(!is_continue)
+		L = end_address;
+	while(1){
+		if(PC<start_address || PC>=end_address) break;
+		opcode = memory_space[PC/16][PC%16];
+		// ...ing
+		ni = opcode & (unsigned char)0x03;
+		opcode = opcode & (unsigned char)0xFC;
+		// printf("opcode: %06X\n", opcode);
+
+		format = opcode_format(opcode);
+		// printf("PC: %06X\n", PC);
+
+		if(format == 0){ // opcode가 아닌 경우. 즉 WORD, BYTE 상수
+			PC += 3;
+		}
+		else{
+			PC++;
+			if(format == 2){
+				target_address = (int)memory_space[PC/16][PC%16];
+				PC++;
+				execute_opcode(format, opcode, 0, target_address);
+			}
+			else if(format == 3){
+				nixbpe = memory_space[PC/16][PC%16] & (unsigned char)0xF0;
+				nixbpe = nixbpe >> 4;
+				nixbpe += ni << 4;
+				target_address = memory_space[PC/16][PC%16] & (unsigned char)0x0F;
+				PC++;
+				if(nixbpe % 2){ // format 4
+					target_address = target_address << 8;
+					target_address += memory_space[PC/16][PC%16];
+					PC++;
+				}
+				target_address = target_address << 8;
+				target_address += memory_space[PC/16][PC%16];
+				PC++;
+				execute_opcode(format, opcode, nixbpe, target_address);
+			}
+		}
+		//printf("target: %06X // nixbpe: %02X\nformat: %d  // PC: %06X\n",target_address, nixbpe, format, PC);
+
+		for(int i=0 ; i<bp_num ; i++){
+			if(break_point[i] == PC){
+				is_end = 0;
+				print_register();
+				printf("\t\tStop at checkpoint[%X]\n", PC);
+				exeaddr=PC;
+				break_flag = 1;
+				is_continue = 1;
+				break;
+			}
+		}
+		if(break_flag) break;
+
+		if(++cnt == max_cnt){
+			printf("Error!!\n");
+			break;
+		}
+	}
+	if(is_end == 1){
+		print_register();
+		printf("\t\tEnd Program\n");
+		is_continue = 0;
+	}
+	
 }
 
 void execute_opcode(int format, int opcode, int nixbpe, int target_address){
-	int* reg_address[10];
-	reg_address[0] = &A; reg_address[1] = &X; reg_address[2] = &L;
-	reg_address[3] = &B; reg_address[4] = &S; reg_address[5] = &T;
-	reg_address[6] = &F; reg_address[7] = NULL;
-	reg_address[8] = &PC: reg_address[9] = &SW;
 
 	if (format == 2){
-		int *r1 = reg_address[target_address/16];
+		int *r1 = reg_address(target_address/16);
 
 		if(opcode == 0xB4){ // CLEAR r1
 			*r1 = 0;
@@ -68,16 +142,15 @@ void execute_opcode(int format, int opcode, int nixbpe, int target_address){
 
 	}
 	else{
-		unsigned char n, i, x, b, p, e;
+		unsigned char n, i, x, b, p;
 
 		n = nixbpe/32;
 		i = (nixbpe/16) % 2;
 		x = (nixbpe/8) % 2;
 		b = (nixbpe/4) % 2;
 		p = (nixbpe/2) % 2;
-		e = nixbpe % 2;
 
-		if(p==1) target_address = (signed char)target_address + PC;
+		if(p==1) target_address = (signed char) target_address + PC;
 		else if(b==1) target_address += B;
 
 		if(x==1) target_address += X;
@@ -93,7 +166,7 @@ void execute_opcode(int format, int opcode, int nixbpe, int target_address){
 			for (int i=0 ; i<2 ; i++){
 				memory_value = 0;
 				for(int j=2 ; j>-1 ; j--){
-					memory_value += (int)memory_space[location/16][location%16] * my_pow(2, i*8);
+					memory_value += (int)memory_space[location/16][location%16] << (j*8);
 					location++;
 				}
 				if(i==0){
@@ -112,7 +185,7 @@ void execute_opcode(int format, int opcode, int nixbpe, int target_address){
 
 		if(opcode == 0x14){ // STL m
 			location -= 3;
-			memory_wrote(L, location);
+			memory_write(L, location);
 		}
 		else if(opcode == 0x68){ // LDB m
 			B = memory_value;
@@ -126,7 +199,7 @@ void execute_opcode(int format, int opcode, int nixbpe, int target_address){
 		}
 		else if(opcode == 0x28){ // COMP m
 			if (A > memory_value) CC = 1;
-			else if(A < momory_value) CC = -1;
+			else if(A < memory_value) CC = -1;
 			else CC = 0;
 		}
 		else if(opcode == 0x30){ // JEQ m
@@ -189,11 +262,35 @@ void memory_write(int value, int location){
 }
 
 
-int* get_reg_address(int reg){
-	if(reg == 0x00) return &A;
-	else if(reg == 0x01) return &X;
-	else if(reg == 0x02) return &L;
-	else if(reg == 0x03) return &B;
-	else if(reg == 0x04) return &S;
-	else if(reg == 0x05) return
+void print_register(){
+	printf("A : %06X  X : %06X\n", A, X);
+	printf("L : %06X PC : %06X\n", L, PC);
+	printf("B : %06X  S : %06X\n", B, S);
+	printf("T : %06X\n", T);
+}
+
+int *reg_address(int num){
+	switch (num) {
+		case 0:
+			return &A;
+		case 1:
+			return &X;
+		case 2:
+			return &L;
+		case 3:
+			return &B;
+		case 4:
+			return &S;
+		case 5:
+			return &T;
+		case 6:
+			return &F;
+		case 8:
+			return &PC;
+		case 9:
+			return &SW;
+		default:
+			return NULL;
+	}
+
 }

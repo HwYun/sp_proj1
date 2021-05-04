@@ -39,7 +39,7 @@ typedef struct HashNode* hashptr;
 
 typedef struct HashNode{
 	char mnemonic[10];
-	char opcode;
+	int opcode;
 	char format[5];
 	hashptr next;
 }HashNode;
@@ -50,9 +50,11 @@ void print_hashtable();
 int hash_key(char *mnemonic);
 void create_opcode_hash();
 void add_hash(HashNode* node);
-char find_hash(char *mnemonic);
+int find_hash(char *mnemonic);
 int find_format(char *mnemonic, char *format);
 void free_hash();
+int opcode_format(int opcode);
+
 
 /* type.c */
 int type(char *filename);
@@ -87,6 +89,8 @@ void print_symbol_table();
 int progaddr;
 int break_point[100];
 int bp_num;
+int exeaddr;
+int prog_len;
 
 int A, X, L, B, S, T, F, PC, SW, CC; // Register
 
@@ -123,3 +127,6 @@ void print_bp();
 void bp_sort();
 void my_run();
 void execute_opcode(int format, int opcode, int nixbpe, int target_address);
+void memory_write(int value, int location);
+void print_register();
+int *reg_address(int num);

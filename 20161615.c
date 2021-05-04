@@ -363,11 +363,9 @@ int main(){
 			// token[1]을 find_hash 함수로 확인
 			// 맞으면 해당하는 opcode hashtable에서 찾아서 출력
 			// 아니면 실행 하지 않음.
-			char opcode = find_hash(token[1]);
+			int opcode = find_hash(token[1]);
 			if(opcode != -1){
-				printf("opcode is ");
-				print_hex_from_dec(opcode);
-				printf("\n");
+				printf("opcode is %2X\n", opcode);
 				create_history_tok(token);
 			}
 			else printf("Please Input Corrcet Opcode.\n");
@@ -404,6 +402,7 @@ int main(){
 				printf("Please Input Correct Hexadecimal.\n");
 			else{
 				progaddr = tmp_address;
+				exeaddr = progaddr;
 				create_history_tok(token);
 			}
 		}
@@ -431,6 +430,10 @@ int main(){
 				bp(token[1]);
 			}
 			create_history_tok(token);
+		}
+		else if(strcmp(instruction, "run") == 0){ // run
+			my_run();
+			create_history_ins(instruction);
 		}
 		else
 			printf("Please Input Correct Instruction.\n");
